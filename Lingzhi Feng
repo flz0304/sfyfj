@@ -1,0 +1,39 @@
+from statistics import median_grouped
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+
+plt.style.use('seaborn')
+
+df_date = pd.read_csv('nobel_prizes_by_date.csv')
+df_winner = pd.read_csv('nobel_prize_by_winner.csv')
+
+#排序赋值
+df_winner=df_winner.sort_values(by='id',ascending=True)
+df_date=df_date.sort_values(by='id',ascending=True)
+df_winner['date']=df_date['year']
+
+#左边选择框
+subject_filter = st.sidebar.multiselect(
+     'choose the price type',
+     df_winner.category.unique(),  # options
+     df_winner.category.unique()) 
+df_winner = df_winner[df_winner.category.isin(subject_filter)]
+
+#上方拉条
+pop_filter = st.slider('the year of getting the prize',1900,2020,1940)
+df_winner = df_winner[df_winner['year'] <= pop_filter]
+
+#处理csv
+#df_date.drop(['index', 'overallMotivation',"share"], axis=1, inplace=True)
+#df_date = df_date[df_date.firstname.notnull()].copy()
+#organisations = df_date[df_date.gender == 'org'].copy()
+#df_date = df_date[df_date.gender != 'org'].copy()
+
+#显示国家
+country = df_winner.country.value_counts()
+fig ,ax=plt.subplots(figsize=(20,15))
+ax.set_xlabel('Countries')
+ax.set_ylabel('number of person/team')
+country.plot.bar()
+st.pyplot(fig)
